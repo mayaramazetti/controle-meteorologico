@@ -1,194 +1,429 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Captura de Geolocalização</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b172a">
+  <title>Coleta de Dados Meteorológicos</title>
+
+  <style>
+    :root {
+      --bg: #0b172a;
+      --panel: rgba(17, 31, 54, .88);
+      --line: rgba(173, 195, 226, .18);
+      --text: #f4f7fb;
+      --muted: #aab8cc;
+      --accent: #55c2e8;
+      --accent-dark: #143e59;
+      --ok: #65d6a2;
+      --error: #ff8d8d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 32px 16px;
+      display: grid;
+      place-items: center;
+      color: var(--text);
+      font-family: Inter, system-ui, sans-serif;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(46,139,181,.22), transparent 34%),
+        radial-gradient(circle at 90% 85%, rgba(70,105,170,.2), transparent 32%),
+        var(--bg);
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 560px;
+    }
+
+    .eyebrow {
+      color: #9bdcf2;
+      font-size: .76rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .card {
+      margin-top: 14px;
+      padding: clamp(24px, 5vw, 38px);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: 0 24px 70px rgba(0,0,0,.32);
+      backdrop-filter: blur(14px);
+    }
+
+    .icon {
+      width: 54px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: rgba(85,194,232,.13);
+      font-size: 27px;
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.65rem, 5vw, 2.1rem);
+      letter-spacing: -.04em;
+    }
+
+    .intro {
+      color: var(--muted);
+      line-height: 1.6;
+      margin: 10px 0 28px;
+    }
+
+    .field {
+      margin: 20px 0;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: .91rem;
+      font-weight: 650;
+    }
+
+    .required {
+      color: var(--accent);
+    }
+
+    input {
+      width: 100%;
+      min-height: 50px;
+      padding: 13px 14px;
+      color: var(--text);
+      background: rgba(5,15,30,.58);
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      font: inherit;
+      outline: none;
+      transition: .2s;
+    }
+
+    input::placeholder {
+      color: #71829a;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(85,194,232,.13);
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: .78rem;
+      margin: 7px 0 0;
+    }
+
+    .location-btn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 9px;
+      width: 100%;
+      min-height: 47px;
+      margin: 5px 0 22px;
+      color: #c9effa;
+      background: var(--accent-dark);
+      border: 1px solid rgba(85,194,232,.28);
+      border-radius: 11px;
+      font: inherit;
+      font-weight: 650;
+      cursor: pointer;
+    }
+
+    button:hover {
+      filter: brightness(1.12);
+    }
+
+    button:disabled {
+      opacity: .6;
+      cursor: wait;
+    }
+
+    .submit {
+      width: 100%;
+      min-height: 52px;
+      margin-top: 8px;
+      color: #071827;
+      background: linear-gradient(110deg, #75d7ef, #55c2e8);
+      border: 0;
+      border-radius: 11px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .status {
+      min-height: 22px;
+      margin: 16px 0 0;
+      font-size: .88rem;
+      line-height: 1.5;
+    }
+
+    .status.success {
+      color: var(--ok);
+    }
+
+    .status.error {
+      color: var(--error);
+    }
+
+    .footer {
+      color: #71829a;
+      font-size: .76rem;
+      text-align: center;
+      margin: 18px 8px 0;
+    }
+
+    @media (max-width: 420px) {
+      body {
+        padding: 18px 12px;
+      }
+
+      .card {
+        border-radius: 18px;
+      }
+    }
+  </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
-    <!-- Header -->
-    <header class="w-full py-6 px-8 border-b border-slate-800 flex items-center justify-between">
-        <div class="flex items-center space-x-3">
-            <div class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
-            <span class="font-semibold text-lg tracking-tight">Geolocalizador &bull; Google Forms</span>
+
+<body>
+
+  <main class="wrap">
+
+    <div class="eyebrow">Formulário de coleta</div>
+
+    <section class="card">
+
+      <div class="icon">🌦️</div>
+
+      <h1>Dados meteorológicos</h1>
+
+      <p class="intro">
+        Informe o local e suas coordenadas geográficas
+        para registrar a coleta.
+      </p>
+
+      <form
+        id="weatherForm"
+        action="https://docs.google.com/forms/d/e/1FAIpQLScxXaIxFQjUrjGkDrvjQgIxymR7BdeiastMG3b7RakJaYdXjA/formResponse"
+        method="POST"
+        target="googleFormFrame"
+      >
+
+        <div class="field">
+          <label for="local">
+            Nome do local <span class="required">*</span>
+          </label>
+
+          <input
+            id="local"
+            name="entry.1059568042"
+            type="text"
+            placeholder="Ex.: Campinas, SP"
+            required
+            maxlength="200"
+          >
         </div>
-        <span class="text-xs text-slate-400 bg-slate-800 px-3 py-1 rounded-full border border-slate-700">GitHub Pages Ready</span>
-    </header>
 
-    <!-- Main Content -->
-    <main class="max-w-xl w-full mx-auto p-6 my-auto">
-        <div class="bg-slate-800/60 backdrop-blur-xl border border-slate-700/80 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
-            <!-- Decorative Glow -->
-            <div class="absolute -top-24 -right-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <button
+          class="location-btn"
+          id="geoButton"
+          type="button"
+        >
+          ◎ Usar minha localização
+        </button>
 
-            <div class="text-center mb-8">
-                <h1 class="text-2xl font-bold tracking-tight text-white mb-2">Registro de Localização</h1>
-                <p class="text-sm text-slate-400">Capture via GPS ou insira as coordenadas manualmente.</p>
-            </div>
+        <div class="field">
+          <label for="latitude">
+            Latitude <span class="required">*</span>
+          </label>
 
-            <!-- Status Box -->
-            <div id="status-box" class="mb-6 p-4 rounded-xl bg-slate-900/80 border border-slate-700 flex items-center space-x-3 transition-all duration-300">
-                <div id="status-icon" class="flex-shrink-0">
-                    <svg class="w-5 h-5 text-amber-400 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                </div>
-                <div class="text-sm">
-                    <span id="status-title" class="font-medium text-slate-200">Obtendo localização...</span>
-                    <p id="status-desc" class="text-xs text-slate-400">Permita o acesso ou preencha os campos abaixo.</p>
-                </div>
-            </div>
+          <input
+            id="latitude"
+            name="entry.1930279681"
+            type="number"
+            step="any"
+            min="-90"
+            max="90"
+            placeholder="Ex.: -22.9056"
+            required
+          >
 
-            <!-- Form -->
-            <form id="geo-form" action="https://docs.google.com/forms/d/e/1FAIpQLScxXaIxFQjUrjGkDrvjQgIxymR7BdeiastMG3b7RakJaYdXjA/formResponse" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-medium text-slate-300 uppercase tracking-wider mb-1.5">Local / Endereço</label>
-                    <input type="text" id="entry_local" name="entry.1059568042" required
-                        class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                        placeholder="Nome do local ou endereço">
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-300 uppercase tracking-wider mb-1.5">Latitude</label>
-                        <input type="text" id="entry_lat" name="entry.1930279681" required
-                            placeholder="-23.550520"
-                            class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-300 uppercase tracking-wider mb-1.5">Longitude</label>
-                        <input type="text" id="entry_lon" name="entry.1128105295" required
-                            placeholder="-46.633308"
-                            class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
-                    </div>
-                </div>
-
-                <div class="pt-4 flex items-center gap-3">
-                    <button type="button" id="btn-retry" onclick="getLocation()"
-                        class="px-4 py-3 bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium text-sm rounded-xl transition-all flex items-center justify-center space-x-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                        </svg>
-                        <span>Atualizar GPS</span>
-                    </button>
-
-                    <button type="submit" id="btn-submit" disabled
-                        class="flex-1 py-3 px-6 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-medium text-sm rounded-xl transition-all shadow-lg shadow-indigo-600/20 flex items-center justify-center space-x-2">
-                        <span>Enviar para o Google Forms</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                        </svg>
-                    </button>
-                </div>
-            </form>
-
-            <!-- Success Message -->
-            <div id="success-msg" class="hidden mt-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm text-center font-medium">
-                ✓ Dados enviados com sucesso para o formulário!
-            </div>
+          <p class="hint">Valor entre -90 e 90.</p>
         </div>
-    </main>
 
-    <!-- Footer -->
-    <footer class="w-full py-6 px-8 text-center text-xs text-slate-500 border-t border-slate-800">
-        Pronto para GitHub Pages &bull; Feito com HTML5, Tailwind CSS e JavaScript Moderno
-    </footer>
+        <div class="field">
+          <label for="longitude">
+            Longitude <span class="required">*</span>
+          </label>
 
-    <script>
-        const inputLocal = document.getElementById('entry_local');
-        const inputLat = document.getElementById('entry_lat');
-        const inputLon = document.getElementById('entry_lon');
-        const btnSubmit = document.getElementById('btn-submit');
-        const geoForm = document.getElementById('geo-form');
+          <input
+            id="longitude"
+            name="entry.1128105295"
+            type="number"
+            step="any"
+            min="-180"
+            max="180"
+            placeholder="Ex.: -47.0608"
+            required
+          >
 
-        function validateForm() {
-            const hasLat = inputLat.value.trim() !== '';
-            const hasLon = inputLon.value.trim() !== '';
-            const hasLocal = inputLocal.value.trim() !== '';
-            btnSubmit.disabled = !(hasLat && hasLon && hasLocal);
+          <p class="hint">Valor entre -180 e 180.</p>
+        </div>
+
+        <button
+          class="submit"
+          id="submitButton"
+          type="submit"
+        >
+          Enviar dados
+        </button>
+
+        <p
+          class="status"
+          id="status"
+          role="status"
+          aria-live="polite"
+        ></p>
+
+      </form>
+
+      <iframe
+        name="googleFormFrame"
+        title="Envio do formulário"
+        hidden
+      ></iframe>
+
+    </section>
+
+    <p class="footer">
+      Os dados serão enviados ao formulário de destino do Google Forms.
+    </p>
+
+  </main>
+
+  <script>
+    const form = document.getElementById('weatherForm');
+    const geoButton = document.getElementById('geoButton');
+    const submitButton = document.getElementById('submitButton');
+    const status = document.getElementById('status');
+
+    function showStatus(message, type = '') {
+      status.textContent = message;
+      status.className = `status ${type}`;
+    }
+
+    // Captura automática da localização
+    geoButton.addEventListener('click', () => {
+
+      if (!('geolocation' in navigator)) {
+        showStatus(
+          'Seu navegador não oferece suporte à geolocalização.',
+          'error'
+        );
+        return;
+      }
+
+      geoButton.disabled = true;
+      geoButton.textContent = 'Obtendo localização…';
+
+      showStatus(
+        'Permita o acesso à localização quando o navegador solicitar.'
+      );
+
+      navigator.geolocation.getCurrentPosition(
+
+        ({ coords }) => {
+
+          document.getElementById('latitude').value =
+            coords.latitude.toFixed(6);
+
+          document.getElementById('longitude').value =
+            coords.longitude.toFixed(6);
+
+          geoButton.disabled = false;
+
+          geoButton.innerHTML =
+            '✓ Localização preenchida';
+
+          showStatus(
+            'Coordenadas preenchidas. Confira o nome do local antes de enviar.',
+            'success'
+          );
+        },
+
+        (error) => {
+
+          const messages = {
+            1: 'Permissão de localização negada. Preencha manualmente.',
+            2: 'Não foi possível determinar sua localização.',
+            3: 'A solicitação demorou demais. Tente novamente.'
+          };
+
+          showStatus(
+            messages[error.code] ||
+            'Não foi possível obter a localização.',
+            'error'
+          );
+
+          geoButton.disabled = false;
+          geoButton.innerHTML = '◎ Tentar novamente';
+        },
+
+        {
+          enableHighAccuracy: true,
+          timeout: 12000,
+          maximumAge: 60000
         }
 
-        [inputLocal, inputLat, inputLon].forEach(el => {
-            el.addEventListener('input', validateForm);
-        });
+      );
+    });
 
-        async function handleManualCoords() {
-            const lat = parseFloat(inputLat.value.trim().replace(',', '.'));
-            const lon = parseFloat(inputLon.value.trim().replace(',', '.'));
+    // Envio para o Google Forms
+    form.addEventListener('submit', () => {
 
-            if (!isNaN(lat) && !isNaN(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) {
-                inputLat.value = lat;
-                inputLon.value = lon;
-                updateStatus('loading', 'Buscando endereço...', 'Consultando coordenadas informadas...');
-                await reverseGeocode(lat, lon);
-                updateStatus('success', 'Coordenadas manuais prontas!', `Lat: ${lat} | Lon: ${lon}`);
-                validateForm();
-            }
-        }
+      submitButton.disabled = true;
+      submitButton.textContent = 'Enviando…';
 
-        inputLat.addEventListener('blur', handleManualCoords);
-        inputLon.addEventListener('blur', handleManualCoords);
+      showStatus('Enviando os dados ao Google Forms…');
 
-        function updateStatus(type, title, desc) {
-            const box = document.getElementById('status-box');
-            const icon = document.getElementById('status-icon');
-            const titleEl = document.getElementById('status-title');
-            const descEl = document.getElementById('status-desc');
+      // O navegador não permite ler diretamente a resposta
+      // do Google Forms por ser outro domínio.
+      window.setTimeout(() => {
 
-            titleEl.textContent = title;
-            descEl.textContent = desc;
+        submitButton.disabled = false;
+        submitButton.textContent = 'Enviar dados';
 
-            if (type === 'loading') {
-                box.className = "mb-6 p-4 rounded-xl bg-slate-900/80 border border-slate-700 flex items-center space-x-3";
-                icon.innerHTML = `<svg class="w-5 h-5 text-amber-400 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
-            } else if (type === 'success') {
-                box.className = "mb-6 p-4 rounded-xl bg-emerald-950/40 border border-emerald-800/50 flex items-center space-x-3";
-                icon.innerHTML = `<svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
-            } else if (type === 'error') {
-                box.className = "mb-6 p-4 rounded-xl bg-rose-950/40 border border-rose-800/50 flex items-center space-x-3";
-                icon.innerHTML = `<svg class="w-5 h-5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;
-            }
-        }
+        showStatus(
+          'Envio realizado. Verifique as respostas no Google Forms para confirmar o registro.',
+          'success'
+        );
 
-        async function reverseGeocode(lat, lon) {
-            try {
-                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`, {
-                    headers: { 'Accept-Language': 'pt-BR' }
-                });
-                const data = await response.json();
-                if (data && data.address) {
-                    const addr = data.address;
-                    const street = addr.road || addr.suburb || addr.neighbourhood || '';
-                    const city = addr.city || addr.town || addr.municipality || '';
-                    const formatted = street && city ? `${street}, ${city}` : (data.display_name || `${lat}, ${lon}`);
-                    inputLocal.value = formatted;
-                } else {
-                    inputLocal.value = `${lat}, ${lon}`;
-                }
-            } catch (e) {
-                console.warn('Erro no reverse geocoding:', e);
-                if (!inputLocal.value) inputLocal.value = `${lat}, ${lon}`;
-            }
-            validateForm();
-        }
+        form.reset();
 
-        function getLocation() {
-            updateStatus('loading', 'Obtendo localização...', 'Aguardando permissão de GPS do navegador...');
+        geoButton.disabled = false;
+        geoButton.innerHTML = '◎ Usar minha localização';
 
-            if (!navigator.geolocation) {
-                updateStatus('error', 'Geolocalização não suportada', 'Preencha os campos manualmente abaixo.');
-                return;
-            }
+      }, 1800);
 
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    const lat = position.coords.latitude.toFixed(6);
-                    const lon
+    });
+
+  </script>
+
+</body>
+</html>
+
